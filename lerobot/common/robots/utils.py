@@ -14,10 +14,12 @@
 
 import logging
 from pprint import pformat
+from typing import Type
 
 from lerobot.common.robots import RobotConfig
 
 from .robot import Robot
+from .robot_wrapper import RobotWrapper
 
 
 def make_robot_config(robot_type: str, **kwargs) -> RobotConfig:
@@ -32,6 +34,10 @@ def make_robot_config(robot_type: str, **kwargs) -> RobotConfig:
         from .so100_follower.config_so100_follower import SO100FollowerConfig
 
         return SO100FollowerConfig(**kwargs)
+    elif robot_type == "so100_follower_end_effector":
+        from .so100_follower_end_effector.config_so100_follower_end_effector import SO100FollowerEndEffectorConfig
+
+        return SO100FollowerEndEffectorConfig(**kwargs)
     elif robot_type == "stretch":
         from .stretch3.configuration_stretch3 import Stretch3RobotConfig
 
@@ -53,6 +59,10 @@ def make_robot_from_config(config: RobotConfig) -> Robot:
         from .so100_follower import SO100Follower
 
         return SO100Follower(config)
+    elif config.type == "so100_follower_end_effector":
+        from .so100_follower_end_effector import SO100FollowerEndEffector
+
+        return SO100FollowerEndEffector(config)
     elif config.type == "so101_follower":
         from .so101_follower import SO101Follower
 
@@ -121,3 +131,9 @@ def get_arm_id(name, arm_type):
     like Aloha, it could be left_follower, right_follower, left_leader, or right_leader.
     """
     return f"{name}_{arm_type}"
+
+def convert_joint_m100_100_to_degrees(joint_positions: dict[str, float], mins: dict[str, float], maxs: dict[str, float]) -> dict[str, float]:
+    return {key: ((value + 100) / 200) * (maxs[key] - mins[key]) + mins[key] for key, value in joint_positions.items()}
+
+def convert_joint_degrees_to_m100_100(joint_positions: dict[str, float], mins: dict[str, float], maxs: dict[str, float]) -> dict[str, float]:
+    return {key: (value - mins[key]) / (maxs[key] - mins[key]) * 200 - 100 for key, value in joint_positions.items()}

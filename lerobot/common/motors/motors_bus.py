@@ -765,12 +765,19 @@ class MotorsBus(abc.ABC):
             min_ = self.calibration[motor].range_min
             max_ = self.calibration[motor].range_max
             bounded_val = min(max_, max(min_, val))
+            drive_mode = self.calibration[motor].drive_mode
+            homing_offset = self.calibration[motor].homing_offset
             # TODO(Steven): normalization can go boom if max_ == min_, we should add a check probably in record_ranges_of_motions
             # (which probably indicates the user forgot to move a motor, most likely a gripper-like one)
             if self.motors[motor].norm_mode is MotorNormMode.RANGE_M100_100:
-                normalized_values[id_] = (((bounded_val - min_) / (max_ - min_)) * 200) - 100
+                normalized_values[id_] = (((bounded_val - min_) / ((max_ - min_) + 1e-6)) * 200) - 100
             elif self.motors[motor].norm_mode is MotorNormMode.RANGE_0_100:
-                normalized_values[id_] = ((bounded_val - min_) / (max_ - min_)) * 100
+                normalized_values[id_] = ((bounded_val - min_) / ((max_ - min_) + 1e-6)) * 100
+            elif self.motors[motor].norm_mode is MotorNormMode.DEGREE:
+                if drive_mode:
+                    val *= -1
+                val += homing_offset
+                normalized_values[id_] = val / (self.model_resolution_table[self.motors[motor].model] // 2) * 180
             else:
                 # TODO(alibers): velocity and degree modes
                 raise NotImplementedError
@@ -786,12 +793,19 @@ class MotorsBus(abc.ABC):
             motor = self._id_to_name(id_)
             min_ = self.calibration[motor].range_min
             max_ = self.calibration[motor].range_max
+            homing_offset = self.calibration[motor].homing_offset
+            drive_mode = self.calibration[motor].drive_mode
             if self.motors[motor].norm_mode is MotorNormMode.RANGE_M100_100:
                 bounded_val = min(100.0, max(-100.0, val))
                 unnormalized_values[id_] = int(((bounded_val + 100) / 200) * (max_ - min_) + min_)
             elif self.motors[motor].norm_mode is MotorNormMode.RANGE_0_100:
                 bounded_val = min(100.0, max(0.0, val))
                 unnormalized_values[id_] = int((bounded_val / 100) * (max_ - min_) + min_)
+            elif self.motors[motor].norm_mode is MotorNormMode.DEGREE:
+                unnormalized_values[id_] = int(val / 180 * (self.model_resolution_table[self.motors[motor].model] // 2))
+                unnormalized_values[id_] -= homing_offset
+                if drive_mode:
+                    unnormalized_values[id_] *= -1
             else:
                 # TODO(alibers): velocity and degree modes
                 raise NotImplementedError
