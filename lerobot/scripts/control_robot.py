@@ -246,6 +246,9 @@ def record(
     robot: Robot,
     cfg: RecordControlConfig,
 ) -> LeRobotDataset:
+    '''
+    记录 LeRobot形式的数据集
+    '''
     # TODO(rcadene): Add option to record logs
     if cfg.resume:
         dataset = LeRobotDataset(
@@ -253,6 +256,7 @@ def record(
             root=cfg.root,
         )
         if len(robot.cameras) > 0:
+            # 每个 camera 一个 thread
             dataset.start_image_writer(
                 num_processes=cfg.num_image_writer_processes,
                 num_threads=cfg.num_image_writer_threads_per_camera * len(robot.cameras),
