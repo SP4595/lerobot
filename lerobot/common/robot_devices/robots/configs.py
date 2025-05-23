@@ -477,16 +477,16 @@ class So101RobotConfig(ManipulatorRobotConfig):
     cameras: dict[str, CameraConfig] = field(
         default_factory=lambda: {
             "handcamera": OpenCVCameraConfig( # 记得去 benchmarks/videoio/capture_camera_feed.py 检查！
-                camera_index=2,
-                fps=30,
-                width=640,
-                height=480,
-            ),
-            "fixcamera": OpenCVCameraConfig(
                 camera_index=1,
                 fps=30,
-                width=640,
-                height=480,
+                width=1280, # 640 会报错
+                height=720, # 480
+            ),
+            "fixcamera": OpenCVCameraConfig(
+                camera_index=2,
+                fps=30,
+                width=1280,
+                height=720,
             ),
         }
     )

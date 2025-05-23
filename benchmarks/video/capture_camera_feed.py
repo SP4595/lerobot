@@ -38,7 +38,7 @@ def display_and_save_video_stream(output_dir: Path, fps: int, width: int, height
         capture_dir.mkdir(parents=True, exist_ok=True)
 
     # Opens the default webcam
-    cap = cv2.VideoCapture(2) # 摄像头测试 （查看index）
+    cap = cv2.VideoCapture(1) # 摄像头测试 （查看index）
     if not cap.isOpened():
         print("Error: Could not open video stream.")
         return
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--width",
         type=int,
-        default=1280,
+        default=1280, 
         help="Width of the captured images.",
     )
     parser.add_argument(
