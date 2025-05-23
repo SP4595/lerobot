@@ -15,9 +15,9 @@ root = './SO101Datasets/so101_test'
 single_task = "Grasp and handle a key." # 任务
 tags = ["so101"] # 可以不加，如果要push到hugging face上最好加
 fps = 30
-warmup_time_s = 5 # 启动后等 5 秒再开始
-episode_time_s = 30 # 一个 episode 最大 30 个
-reset_time_s = 30 # 每次收集完数据等 30 秒钟
+warmup_time_s = 5 # 整个数据收集启动后等 5 秒再开始（注意，只有最开始的episode受影响！）
+episode_time_s = 30 # 一个 episode 最大 30 秒钟
+reset_time_s = 20 # 每次收集完数据等 30 秒钟 （注意，每个episode都会受影响！）
 num_episodes = 10 # 收集多少个 episode
 push_to_hub = False 
 ############
@@ -52,7 +52,7 @@ class DataCollector:
     fps : int
         每秒帧数（采集频率）
     warmup_time_s : int
-        启动后等待时间（单位：秒）
+        开始收集数据后等待时间（单位：秒）
     episode_time_s : int
         单个 episode 的最大持续时间（单位：秒）
     reset_time_s : int
@@ -158,14 +158,14 @@ if __name__ == "__main__":
     collector = DataCollector(
         robot="so101",
         control_type="record",
-        repo_id="SO101Datasets/so101_snack",
-        root="./SO101Datasets/so101_snack",
+        repo_id="SO101Datasets/so101_act",
+        root="./SO101Datasets/so101_act",
         single_task="Place the snacks in the bowl.",
         tags=["so101"],
         fps=30,
-        warmup_time_s=10,
+        warmup_time_s=5,
         episode_time_s=30,
-        reset_time_s=30,
+        reset_time_s=5,
         num_episodes=10,
         push_to_hub=False,
     )
