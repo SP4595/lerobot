@@ -1,3 +1,7 @@
+'''
+这个其实不是很好用，只是给大家展示一下内部原理而已。
+'''
+
 from lerobot.scripts.control_robot import record, _init_rerun
 from lerobot.common.robot_devices.robots.utils import Robot, make_robot_from_config
 from lerobot.common.robot_devices.robots.configs import So101RobotConfig
@@ -13,8 +17,8 @@ from lerobot.common.robot_devices.control_configs import RecordControlConfig
 '''
 
 ### 设置 ###
-repo_id = 'DATASET/so101_test' # 如果有 root了，那么这个就没关系了
-root = './SO101Datasets/so101_test'
+repo_id = 'SO101Datasets/so101_data' # 如果有 root了，那么这个就没关系了
+root = './SO101Datasets/so101_data'
 single_task = "Grasp and handle a key." # 任务
 tags = ["so101"] # 可以不加，如果要push到hugging face上最好加
 fps = 30
