@@ -1,11 +1,5 @@
 '''
-键位：
-- 1. `ESC`: 停止当前 episode，保存，后续的 episode 也不继续测了
-
-- 2. `键盘右键`: 停止当前 episode，保存。然后等一下开始新 episode
-
-- 3. `键盘左键`: rerecord_episode，停止当前episode并重启。因为只有这样才能保证错误数据不会被写入
-
+推理和数据采集其实是共用框架的！
 
 ### 设置 ###
 robot = 'so101'
@@ -20,31 +14,35 @@ episode_time_s = 30 # 一个 episode 最大 30 秒钟
 reset_time_s = 20 # 每次收集完数据等 30 秒钟 （注意，每个episode都会受影响！）
 num_episodes = 10 # 收集多少个 episode
 push_to_hub = False 
+
+policy.path : 推理用模型位置
 ############
 '''
 
 import subprocess
 import json
 import sys
-from utils import save_backup
 
-class DataCollector:
+
+class VLAInfer:
     """
-    用于控制机器人并收集数据的封装类。
+    用于控制机器人测试并收集测试数据的封装类。
     
     该类将参数构建成标准命令行调用格式，并在系统终端中执行。
     支持 Windows、Linux 等多个平台。
 
     参数说明：
     -----------
+    policy_path : 
+        推理用的模型位置
     robot : str
         机器人型号名称，例如 'so101'
     control_type : str
         控制类型，例如 'record' 表示录制模式
     repo_id : str
-        数据集存储路径标识符 (Hugging Face 风格）
+        测试产生的数据集 标签 (必须有，但是可以留空为 NAN/NAN)
     root : str
-        数据集本地保存路径
+        车市产生的数据集本地保存路径
     single_task : str
         当前任务描述字符串
     tags : list of str
@@ -69,7 +67,8 @@ class DataCollector:
         self,
         robot: str,
         control_type: str,
-        root: str,
+        root:str,
+        policy_path: str,
         single_task: str,
         tags: list,
         fps: int,
@@ -78,12 +77,13 @@ class DataCollector:
         reset_time_s: int,
         num_episodes: int,
         push_to_hub: bool,
-        resume : bool
+        resume : bool,
+        repo_id : str = 'NAN/eval_act' # 必须是 eval 开头，必须是一个 /！
     ):
         # 初始化所有参数为实例变量
         self.robot = robot
         self.control_type = control_type
-        self.repo_id = "HFDS/SO101"
+        self.repo_id = repo_id
         self.root = root
         self.single_task = single_task
         self.tags = tags
@@ -94,6 +94,7 @@ class DataCollector:
         self.num_episodes = num_episodes
         self.push_to_hub = push_to_hub
         self.resume = resume
+        self.policy_path = policy_path
         
     def __process_bool(self, boolean : bool):
         '''
@@ -125,7 +126,8 @@ class DataCollector:
             "control.num_episodes": self.num_episodes,
             "control.push_to_hub": self.__process_bool(self.push_to_hub),
             "control.resume": self.__process_bool(self.resume),
-            "control.root": self.root
+            "control.root": self.root,
+            "control.policy.path":self.policy_path
         }
 
         for key, value in args.items():
@@ -160,33 +162,24 @@ class DataCollector:
         if result.returncode == 0:
             print("✅ 数据收集完成！")
         else:
-            raise ValueError("❌ 数据收集失败！返回码:", result.returncode)
+            print("❌ 数据收集失败！返回码:", result.returncode)
 
 
 # 示例用法
 if __name__ == "__main__":
-    '''
-    如果成功结束采集就会直接写入backup!
-    现在允许多任务采集到同一个dataset下!
-    '''
-    
-    BACKUP_PATH = "./SO101Datasets/backup"
-    SAVE_PATH = "./SO101Datasets/so101-v3"
-    TASK = "Pick up the snack and put it into the bowl."
-    
-    collector = DataCollector(
+    collector = VLAInfer(
         robot="so101",
         control_type="record",
-        root=SAVE_PATH, # 自动生成 root！！！！！
-        single_task=TASK,
+        root="./outputs/test_record/ACT/checkpoints/020000",
+        policy_path="./outputs/train/ACT/checkpoints/080000/pretrained_model", # 开始推理
+        single_task="Pick up the snack and place it in the bowl.",
         tags=["so101"],
         fps=30,
-        warmup_time_s=5,
-        episode_time_s=30,
-        reset_time_s=5,
-        num_episodes=6,
+        warmup_time_s=2,
+        episode_time_s=20,
+        reset_time_s=2,
+        num_episodes=10,
         push_to_hub=False,
         resume = True # 是否在已有数据集的基础上添加数据
     )
     collector.run()
-    save_backup(dir = SAVE_PATH, backup_path = BACKUP_PATH, replace=True)
