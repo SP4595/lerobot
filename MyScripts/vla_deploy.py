@@ -171,7 +171,7 @@ if __name__ == "__main__":
         robot="so101",
         control_type="record",
         root="./outputs/test_record/ACT/checkpoints/020000",
-        policy_path="./outputs/train/ACT/checkpoints/080000/pretrained_model", # 开始推理
+        policy_path="./outputs/train/ACT/checkpoints/100000/pretrained_model", # 开始推理
         single_task="Pick up the snack and place it in the bowl.",
         tags=["so101"],
         fps=30,
