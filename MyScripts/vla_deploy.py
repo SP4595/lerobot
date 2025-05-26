@@ -22,6 +22,7 @@ policy.path : 推理用模型位置
 import subprocess
 import json
 import sys
+import os
 
 
 class VLAInfer:
@@ -78,7 +79,7 @@ class VLAInfer:
         num_episodes: int,
         push_to_hub: bool,
         resume : bool,
-        repo_id : str = 'NAN/eval_act' # 必须是 eval 开头，必须是一个 /！
+        repo_id : str = 'nan/eval_act' # 必须是 eval 开头，必须是一个 /！
     ):
         # 初始化所有参数为实例变量
         self.robot = robot
@@ -167,19 +168,26 @@ class VLAInfer:
 
 # 示例用法
 if __name__ == "__main__":
+    import shutil
+    buffer_dir = "./outputs/test_record/act-so101-v3/checkpoints/test"
+    
+    if os.path.exists(buffer_dir):
+        shutil.rmtree(buffer_dir)
+    
     collector = VLAInfer(
         robot="so101",
         control_type="record",
-        root="./outputs/test_record/ACT/checkpoints/020000",
-        policy_path="./outputs/train/ACT/checkpoints/100000/pretrained_model", # 开始推理
+        root = buffer_dir,
+        policy_path="./outputs/train/act-so101-v3/checkpoints/080000/pretrained_model", # 开始推理
         single_task="Pick up the snack and place it in the bowl.",
         tags=["so101"],
         fps=30,
         warmup_time_s=2,
-        episode_time_s=20,
+        episode_time_s=30,
         reset_time_s=2,
         num_episodes=10,
         push_to_hub=False,
-        resume = True # 是否在已有数据集的基础上添加数据
+        resume = False # 是否在已有数据集的基础上添加数据
     )
+    
     collector.run()
