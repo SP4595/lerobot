@@ -49,6 +49,7 @@ for i in range(total_iterations): # 一共这么多回合
     observation = robot.capture_observation()
     
     # Convert to pytorch format: channel first and float32 in [0,1]
+    # 注意，这里处理所有图片，可能不止一张图片！
     for name in observation:
         if "image" in name:
             observation[name] = observation[name].type(torch.float32) / 255 # uint8 -> float32
