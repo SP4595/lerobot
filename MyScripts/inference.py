@@ -1,4 +1,3 @@
-from lerobot.scripts.control_robot import record, _init_rerun
 from lerobot.common.robot_devices.robots.utils import Robot, make_robot_from_config
 from lerobot.common.robot_devices.robots.configs import So101RobotConfig
 from lerobot.common.policies.act.modeling_act import ACTPolicy
