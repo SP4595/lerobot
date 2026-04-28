@@ -13,10 +13,17 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 policy = PI05Policy.from_pretrained(MODEL_PATH).to(device)
 
+print(device)
+
+PALIGEMMA_TOKENIZER_PATH = "/media/ubuntu/D/Models/modelscope/AI-ModelScope/paligemma-3b-pt-224"
+
 preprocess, postprocess = make_pre_post_processors(
     policy.config,
     MODEL_PATH,
-    preprocessor_overrides={"device_processor": {"device": str(device)}},
+    preprocessor_overrides={
+        "device_processor": {"device": str(device)},
+        "tokenizer_processor": {"tokenizer_name": PALIGEMMA_TOKENIZER_PATH},
+    },
 )
 
 
@@ -81,7 +88,7 @@ print(f"Token IDs    : {tokens[0, :real_len].cpu().tolist()}")
 
 # Reload the same tokenizer to decode IDs back to text (verify round-trip)
 from transformers import AutoTokenizer as _HFTok
-_tok = _HFTok.from_pretrained("google/paligemma-3b-pt-224")
+_tok = _HFTok.from_pretrained(PALIGEMMA_TOKENIZER_PATH)
 decoded = _tok.decode(tokens[0, :real_len].cpu(), skip_special_tokens=False)
 print(f"Decoded text : {decoded!r}")
 print("=" * 70)

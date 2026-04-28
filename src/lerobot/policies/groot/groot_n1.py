@@ -176,10 +176,10 @@ N_COLOR_CHANNELS = 3
 class GR00TN15Config(PretrainedConfig):
     model_type = "gr00t_n1_5"
 
-    backbone_cfg: dict
-    action_head_cfg: dict
-    action_horizon: int
-    action_dim: int
+    backbone_cfg: dict = None
+    action_head_cfg: dict = None
+    action_horizon: int = None
+    action_dim: int = None
     compute_dtype: str = "float32"
 
     def __init__(self, **kwargs):
